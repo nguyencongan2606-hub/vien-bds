@@ -1,0 +1,975 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans); }
+:root {
+  --nav-w: 220px;
+  --hd: 52px;
+  --blue-50: #E6F1FB; --blue-200: #85B7EB; --blue-600: #185FA5; --blue-800: #0C447C; --blue-900: #042C53;
+  --teal-50: #E1F5EE; --teal-200: #5DCAA5; --teal-600: #0F6E56; --teal-800: #085041;
+  --amber-50: #FAEEDA; --amber-200: #EF9F27; --amber-600: #854F0B;
+  --coral-50: #FAECE7; --coral-200: #F0997B; --coral-600: #993C1D;
+  --purple-50: #EEEDFE; --purple-200: #AFA9EC; --purple-600: #534AB7; --purple-800: #3C3489;
+  --green-50: #EAF3DE; --green-200: #97C459; --green-600: #3B6D11;
+  --red-50: #FCEBEB; --red-400: #E24B4A; --red-600: #A32D2D;
+  --gray-50: #F1EFE8; --gray-100: #D3D1C7; --gray-200: #B4B2A9;
+}
+
+#app { display: flex; flex-direction: column; height: 100vh; min-height: 600px; background: var(--color-background-tertiary); }
+
+/* HEADER */
+#hdr { height: var(--hd); background: var(--blue-800); display: flex; align-items: center; padding: 0 16px; gap: 12px; flex-shrink: 0; }
+#hdr .logo { font-size: 13px; font-weight: 500; color: #fff; }
+#hdr .logo span { color: #85B7EB; font-size: 11px; display: block; font-weight: 400; }
+#hdr .hdr-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+#hdr .hdr-right .user { font-size: 12px; color: #B5D4F4; }
+.badge-notif { background: var(--red-400); color: #fff; font-size: 10px; font-weight: 500; border-radius: 999px; padding: 1px 6px; }
+
+/* LAYOUT */
+#layout { display: flex; flex: 1; overflow: hidden; }
+
+/* SIDEBAR */
+#sidebar { width: var(--nav-w); background: var(--color-background-primary); border-right: 0.5px solid var(--color-border-tertiary); display: flex; flex-direction: column; overflow-y: auto; flex-shrink: 0; }
+.nav-group { padding: 8px 0; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.nav-label { font-size: 10px; font-weight: 500; color: var(--color-text-tertiary); padding: 8px 16px 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+.nav-item { display: flex; align-items: center; gap: 8px; padding: 7px 16px; cursor: pointer; font-size: 13px; color: var(--color-text-secondary); transition: background 0.1s; border-left: 2px solid transparent; }
+.nav-item:hover { background: var(--color-background-secondary); }
+.nav-item.active { background: var(--blue-50); color: var(--blue-800); font-weight: 500; border-left-color: var(--blue-600); }
+.nav-icon { width: 16px; text-align: center; font-size: 14px; }
+.nav-count { margin-left: auto; background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); font-size: 10px; padding: 1px 6px; border-radius: 999px; color: var(--color-text-secondary); }
+.nav-count.hot { background: var(--red-50); border-color: var(--red-400); color: var(--red-600); }
+
+/* MAIN */
+#main { flex: 1; overflow-y: auto; padding: 16px; }
+.page { display: none; }
+.page.active { display: block; }
+
+/* CARDS */
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 16px; }
+.stat-card { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 12px 14px; }
+.stat-label { font-size: 11px; color: var(--color-text-secondary); margin-bottom: 4px; }
+.stat-val { font-size: 22px; font-weight: 500; color: var(--color-text-primary); }
+.stat-sub { font-size: 11px; color: var(--color-text-tertiary); margin-top: 2px; }
+.stat-sub.up { color: var(--green-600); }
+.stat-sub.down { color: var(--red-600); }
+
+.card { background: var(--color-background-primary); border-radius: var(--border-radius-lg); border: 0.5px solid var(--color-border-tertiary); margin-bottom: 12px; }
+.card-hd { padding: 12px 16px; border-bottom: 0.5px solid var(--color-border-tertiary); display: flex; align-items: center; justify-content: space-between; }
+.card-title { font-size: 14px; font-weight: 500; }
+.card-body { padding: 0; }
+.card-actions { display: flex; gap: 6px; }
+.btn { font-size: 12px; padding: 5px 12px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); cursor: pointer; color: var(--color-text-primary); background: transparent; }
+.btn:hover { background: var(--color-background-secondary); }
+.btn.primary { background: var(--blue-800); color: #fff; border-color: var(--blue-800); }
+.btn.primary:hover { background: var(--blue-600); }
+
+/* TABLE */
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: left; padding: 8px 14px; font-size: 11px; font-weight: 500; color: var(--color-text-secondary); border-bottom: 0.5px solid var(--color-border-tertiary); background: var(--color-background-secondary); }
+td { padding: 9px 14px; border-bottom: 0.5px solid var(--color-border-tertiary); color: var(--color-text-primary); vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--color-background-secondary); }
+
+/* BADGES */
+.badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 999px; font-weight: 500; }
+.badge-blue { background: var(--blue-50); color: var(--blue-800); }
+.badge-green { background: var(--green-50); color: var(--green-600); }
+.badge-amber { background: var(--amber-50); color: var(--amber-600); }
+.badge-coral { background: var(--coral-50); color: var(--coral-600); }
+.badge-purple { background: var(--purple-50); color: var(--purple-800); }
+.badge-red { background: var(--red-50); color: var(--red-600); }
+.badge-teal { background: var(--teal-50); color: var(--teal-600); }
+
+/* AVATAR */
+.avatar { width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; flex-shrink: 0; }
+.av-blue { background: var(--blue-50); color: var(--blue-800); }
+.av-teal { background: var(--teal-50); color: var(--teal-800); }
+.av-purple { background: var(--purple-50); color: var(--purple-800); }
+.av-amber { background: var(--amber-50); color: var(--amber-600); }
+
+/* PROGRESS */
+.progress-bar { height: 6px; background: var(--color-background-secondary); border-radius: 999px; overflow: hidden; width: 100%; }
+.progress-fill { height: 100%; border-radius: 999px; }
+
+/* GRID 2 COL */
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 600px) { .grid2 { grid-template-columns: 1fr; } }
+
+/* PAGE TITLE */
+.pg-title { font-size: 18px; font-weight: 500; margin-bottom: 4px; }
+.pg-sub { font-size: 13px; color: var(--color-text-secondary); margin-bottom: 16px; }
+
+/* FORM */
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+.form-group { display: flex; flex-direction: column; gap: 4px; }
+.form-label { font-size: 12px; color: var(--color-text-secondary); }
+.form-input { padding: 7px 10px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); font-size: 13px; background: var(--color-background-primary); color: var(--color-text-primary); }
+.form-input:focus { outline: none; border-color: var(--blue-600); }
+select.form-input option { background: var(--color-background-primary); }
+
+/* TIMELINE */
+.timeline { padding: 12px 16px; }
+.tl-item { display: flex; gap: 10px; margin-bottom: 14px; }
+.tl-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+.tl-content { flex: 1; }
+.tl-title { font-size: 13px; font-weight: 500; }
+.tl-meta { font-size: 11px; color: var(--color-text-secondary); }
+
+/* MODAL OVERLAY */
+.overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100; align-items: center; justify-content: center; }
+.overlay.show { display: flex; }
+.modal { background: var(--color-background-primary); border-radius: var(--border-radius-lg); border: 0.5px solid var(--color-border-secondary); padding: 20px; width: 460px; max-width: 95vw; max-height: 80vh; overflow-y: auto; }
+.modal-title { font-size: 15px; font-weight: 500; margin-bottom: 14px; }
+.modal-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
+
+/* QUICK STAT PILL */
+.pill-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.pill { background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: 999px; padding: 4px 12px; font-size: 12px; display: flex; align-items: center; gap: 6px; }
+.pill strong { font-weight: 500; }
+</style>
+
+<div id="app">
+  <div id="hdr">
+    <div style="width:32px;height:32px;background:var(--blue-600);border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:500;flex-shrink:0;">VĐT</div>
+    <div class="logo">Viện Nghiên Cứu & Đào Tạo BĐS <span>Hệ thống quản lý nội bộ — VRETI IMS</span></div>
+    <div class="hdr-right">
+      <span class="badge-notif">5</span>
+      <span class="user">Nguyễn Viện Trưởng ▾</span>
+    </div>
+  </div>
+
+  <div id="layout">
+    <div id="sidebar">
+      <div class="nav-group">
+        <div class="nav-label">Tổng quan</div>
+        <div class="nav-item active" onclick="showPage('dashboard')"><span class="nav-icon">⊞</span> Dashboard</div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-label">Đào tạo</div>
+        <div class="nav-item" onclick="showPage('courses')"><span class="nav-icon">📚</span> Khoá học <span class="nav-count hot">12</span></div>
+        <div class="nav-item" onclick="showPage('students')"><span class="nav-icon">👥</span> Học viên <span class="nav-count">347</span></div>
+        <div class="nav-item" onclick="showPage('schedule')"><span class="nav-icon">📅</span> Lịch khai giảng</div>
+        <div class="nav-item" onclick="showPage('exam')"><span class="nav-icon">✏️</span> Thi & Đánh giá <span class="nav-count hot">8</span></div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-label">Chứng chỉ</div>
+        <div class="nav-item" onclick="showPage('cert')"><span class="nav-icon">🏆</span> Cấp chứng chỉ <span class="nav-count hot">23</span></div>
+        <div class="nav-item" onclick="showPage('cert_lookup')"><span class="nav-icon">🔍</span> Tra cứu CC</div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-label">Nhân sự</div>
+        <div class="nav-item" onclick="showPage('staff')"><span class="nav-icon">🧑‍💼</span> Cán bộ – Giảng viên</div>
+        <div class="nav-item" onclick="showPage('hr')"><span class="nav-icon">📋</span> Quản lý HR</div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-label">Tài chính</div>
+        <div class="nav-item" onclick="showPage('finance')"><span class="nav-icon">💰</span> Thu – Chi</div>
+        <div class="nav-item" onclick="showPage('tuition')"><span class="nav-icon">💳</span> Học phí</div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-label">Địa bàn</div>
+        <div class="nav-item" onclick="showPage('branches')"><span class="nav-icon">🗺️</span> Chi nhánh / Tỉnh thành</div>
+        <div class="nav-item" onclick="showPage('partners')"><span class="nav-icon">🤝</span> Đối tác liên kết</div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-label">Nghiên cứu</div>
+        <div class="nav-item" onclick="showPage('research')"><span class="nav-icon">🔬</span> Đề tài nghiên cứu</div>
+        <div class="nav-item" onclick="showPage('publications')"><span class="nav-icon">📰</span> Ấn phẩm & Báo cáo</div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-label">Hành chính</div>
+        <div class="nav-item" onclick="showPage('docs')"><span class="nav-icon">📁</span> Văn bản – Hồ sơ</div>
+        <div class="nav-item" onclick="showPage('assets')"><span class="nav-icon">🏢</span> Cơ sở vật chất</div>
+        <div class="nav-item" onclick="showPage('reports')"><span class="nav-icon">📊</span> Báo cáo tổng hợp</div>
+      </div>
+    </div>
+
+    <div id="main">
+
+      <!-- DASHBOARD -->
+      <div class="page active" id="p-dashboard">
+        <div class="pg-title">Tổng quan hệ thống</div>
+        <div class="pg-sub">Cập nhật: Thứ Ba, 06/05/2025 — Quý II/2025</div>
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-label">Học viên đang học</div><div class="stat-val">347</div><div class="stat-sub up">+28 tháng này</div></div>
+          <div class="stat-card"><div class="stat-label">Khoá học đang mở</div><div class="stat-val">12</div><div class="stat-sub">3 sắp khai giảng</div></div>
+          <div class="stat-card"><div class="stat-label">Chứng chỉ đã cấp</div><div class="stat-val">2,841</div><div class="stat-sub up">+23 chờ cấp</div></div>
+          <div class="stat-card"><div class="stat-label">Doanh thu T5/2025</div><div class="stat-val">1.2 tỷ</div><div class="stat-sub up">+14% so tháng trước</div></div>
+          <div class="stat-card"><div class="stat-label">Giảng viên</div><div class="stat-val">34</div><div class="stat-sub">18 cơ hữu</div></div>
+          <div class="stat-card"><div class="stat-label">Chi nhánh</div><div class="stat-val">9</div><div class="stat-sub">7 tỉnh thành</div></div>
+        </div>
+        <div class="grid2">
+          <div class="card">
+            <div class="card-hd"><div class="card-title">Khoá học đang hoạt động</div></div>
+            <div class="card-body">
+              <table>
+                <thead><tr><th>Khoá học</th><th>HV</th><th>Tiến độ</th></tr></thead>
+                <tbody>
+                  <tr><td>Môi giới BĐS K15 – HCM</td><td>42</td><td><div class="progress-bar"><div class="progress-fill" style="width:65%;background:var(--blue-600)"></div></div></td></tr>
+                  <tr><td>Chứng chỉ hành nghề K8 – HN</td><td>38</td><td><div class="progress-bar"><div class="progress-fill" style="width:80%;background:var(--teal-600)"></div></div></td></tr>
+                  <tr><td>Định giá BĐS K3 – ĐN</td><td>29</td><td><div class="progress-bar"><div class="progress-fill" style="width:40%;background:var(--amber-200)"></div></div></td></tr>
+                  <tr><td>Quản lý vận hành K2 – CT</td><td>25</td><td><div class="progress-bar"><div class="progress-fill" style="width:20%;background:var(--purple-600)"></div></div></td></tr>
+                  <tr><td>Đầu tư BĐS K5 – BD</td><td>33</td><td><div class="progress-bar"><div class="progress-fill" style="width:55%;background:var(--coral-600)"></div></div></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-hd"><div class="card-title">Hoạt động gần đây</div></div>
+            <div class="card-body">
+              <div class="timeline">
+                <div class="tl-item"><div class="tl-dot" style="background:var(--green-600)"></div><div class="tl-content"><div class="tl-title">Cấp 23 chứng chỉ môi giới BĐS</div><div class="tl-meta">K7 – Hà Nội · 2 giờ trước</div></div></div>
+                <div class="tl-item"><div class="tl-dot" style="background:var(--blue-600)"></div><div class="tl-content"><div class="tl-title">Khai giảng K16 tại TP.HCM</div><div class="tl-meta">45 học viên đăng ký · Hôm nay</div></div></div>
+                <div class="tl-item"><div class="tl-dot" style="background:var(--amber-600)"></div><div class="tl-content"><div class="tl-title">Nhận thanh toán học phí 85 triệu</div><div class="tl-meta">Học viên K15 HCM · Hôm qua</div></div></div>
+                <div class="tl-item"><div class="tl-dot" style="background:var(--purple-600)"></div><div class="tl-content"><div class="tl-title">Thêm chi nhánh Cần Thơ</div><div class="tl-meta">Đối tác Thành Đô · 2 ngày trước</div></div></div>
+                <div class="tl-item"><div class="tl-dot" style="background:var(--coral-600)"></div><div class="tl-content"><div class="tl-title">Thi kết thúc khoá K14 – HCM</div><div class="tl-meta">38 học viên dự thi · 3 ngày trước</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Phân bố học viên theo tỉnh thành</div></div>
+          <div class="card-body" style="padding:14px">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;">
+              ${[['TP.HCM','124','blue'],['Hà Nội','89','teal'],['Đà Nẵng','47','purple'],['Bình Dương','38','amber'],['Cần Thơ','22','coral'],['Hải Phòng','18','green'],['Đồng Nai','9','blue']].map(([city,n,c])=>`
+              <div style="background:var(--${c}-50);border-radius:var(--border-radius-md);padding:10px 12px;text-align:center;">
+                <div style="font-size:18px;font-weight:500;color:var(--${c}-800)">${n}</div>
+                <div style="font-size:11px;color:var(--${c}-600)">${city}</div>
+              </div>`).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COURSES -->
+      <div class="page" id="p-courses">
+        <div class="pg-title">Quản lý khoá học</div>
+        <div class="pg-sub">Danh sách tất cả chương trình đào tạo</div>
+        <div class="pill-row">
+          <div class="pill"><strong>12</strong> đang mở</div>
+          <div class="pill"><strong>3</strong> sắp khai giảng</div>
+          <div class="pill"><strong>5</strong> hoàn thành T4</div>
+          <div class="pill"><strong>2</strong> tạm dừng</div>
+        </div>
+        <div class="card" style="margin-bottom:10px">
+          <div class="card-hd">
+            <div class="card-title">Tất cả khoá học</div>
+            <div class="card-actions">
+              <button class="btn primary" onclick="showModal('modal-course')">+ Thêm khoá học</button>
+            </div>
+          </div>
+          <div class="card-body">
+            <table>
+              <thead><tr><th>Mã khoá</th><th>Tên chương trình</th><th>Tỉnh/Chi nhánh</th><th>Thời lượng</th><th>HV tối đa</th><th>HV đã đăng ký</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+              <tbody>
+                ${[
+                  ['K15-HCM','Môi giới BĐS cơ bản','TP.HCM','60 tiết','50','42','Đang học','blue'],
+                  ['K8-HN','Chứng chỉ hành nghề MG','Hà Nội','80 tiết','40','38','Đang học','teal'],
+                  ['K3-DN','Định giá bất động sản','Đà Nẵng','40 tiết','35','29','Đang học','purple'],
+                  ['K2-CT','Quản lý vận hành BĐS','Cần Thơ','50 tiết','30','25','Đang học','amber'],
+                  ['K5-BD','Đầu tư & Phân tích BĐS','Bình Dương','70 tiết','40','33','Đang học','coral'],
+                  ['K16-HCM','Môi giới BĐS nâng cao','TP.HCM','80 tiết','50','45','Sắp khai giảng','green'],
+                  ['K9-HN','Luật kinh doanh BĐS','Hà Nội','40 tiết','40','0','Sắp khai giảng','blue'],
+                  ['K14-HCM','Môi giới BĐS cơ bản','TP.HCM','60 tiết','50','48','Đã hoàn thành','teal'],
+                ].map(([code,name,city,hours,max,reg,status,c])=>`
+                <tr>
+                  <td><span style="font-family:var(--font-mono);font-size:12px;color:var(--color-text-secondary)">${code}</span></td>
+                  <td style="font-weight:500">${name}</td>
+                  <td>${city}</td>
+                  <td>${hours}</td>
+                  <td style="text-align:center">${max}</td>
+                  <td><span class="badge badge-${c}">${reg}/${max}</span></td>
+                  <td><span class="badge badge-${status==='Đang học'?'blue':status==='Đã hoàn thành'?'green':status==='Sắp khai giảng'?'amber':'coral'}">${status}</span></td>
+                  <td><button class="btn" style="font-size:11px;padding:3px 8px">Chi tiết</button></td>
+                </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- STUDENTS -->
+      <div class="page" id="p-students">
+        <div class="pg-title">Quản lý học viên</div>
+        <div class="pg-sub">Hồ sơ và tiến độ học tập</div>
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-label">Tổng học viên</div><div class="stat-val">347</div><div class="stat-sub up">+28 tháng này</div></div>
+          <div class="stat-card"><div class="stat-label">Đang học</div><div class="stat-val">210</div></div>
+          <div class="stat-card"><div class="stat-label">Đã tốt nghiệp</div><div class="stat-val">119</div></div>
+          <div class="stat-card"><div class="stat-label">Bảo lưu</div><div class="stat-val">18</div></div>
+        </div>
+        <div class="card">
+          <div class="card-hd">
+            <div class="card-title">Danh sách học viên</div>
+            <div class="card-actions">
+              <input class="form-input" placeholder="Tìm kiếm..." style="width:180px;height:30px;padding:4px 10px;font-size:12px">
+              <button class="btn primary" onclick="showModal('modal-student')">+ Thêm HV</button>
+            </div>
+          </div>
+          <div class="card-body">
+            <table>
+              <thead><tr><th>Học viên</th><th>Mã HV</th><th>Khoá học</th><th>Tỉnh thành</th><th>Học phí</th><th>Tình trạng</th><th>Chứng chỉ</th></tr></thead>
+              <tbody>
+                ${[
+                  ['Nguyễn Thị Lan','HV-2025-0341','K15-HCM','TP.HCM','8.500.000','Đang học','Chưa cấp','NT'],
+                  ['Trần Văn Minh','HV-2025-0340','K8-HN','Hà Nội','9.200.000','Đang học','Chưa cấp','TV'],
+                  ['Lê Hoàng Nam','HV-2025-0338','K14-HCM','TP.HCM','8.500.000','Đã TN','Đã cấp','LH'],
+                  ['Phạm Thị Hoa','HV-2025-0335','K3-DN','Đà Nẵng','7.800.000','Đang học','Chưa cấp','PH'],
+                  ['Đặng Quốc Tuấn','HV-2025-0330','K5-BD','Bình Dương','10.500.000','Đang học','Chưa cấp','DQ'],
+                  ['Võ Thị Kim','HV-2025-0325','K14-HCM','TP.HCM','8.500.000','Đã TN','Đã cấp','VK'],
+                  ['Bùi Văn Hải','HV-2025-0318','K8-HN','Hà Nội','9.200.000','Bảo lưu','Chưa cấp','BH'],
+                ].map(([name,id,course,city,fee,status,cert,av])=>`
+                <tr>
+                  <td><div style="display:flex;align-items:center;gap:8px"><div class="avatar av-blue">${av}</div>${name}</div></td>
+                  <td style="font-family:var(--font-mono);font-size:11px;color:var(--color-text-secondary)">${id}</td>
+                  <td>${course}</td>
+                  <td>${city}</td>
+                  <td style="font-variant-numeric:tabular-nums">${parseInt(fee.replace(/\./g,'')).toLocaleString('vi-VN')}đ</td>
+                  <td><span class="badge badge-${status==='Đang học'?'blue':status==='Đã TN'?'green':'amber'}">${status}</span></td>
+                  <td><span class="badge badge-${cert==='Đã cấp'?'teal':'coral'}">${cert}</span></td>
+                </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCHEDULE -->
+      <div class="page" id="p-schedule">
+        <div class="pg-title">Lịch khai giảng</div>
+        <div class="pg-sub">Kế hoạch tổ chức khoá học theo tỉnh thành</div>
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Lịch tháng 5–6/2025</div><button class="btn primary">+ Lên kế hoạch</button></div>
+          <div class="card-body">
+            <table>
+              <thead><tr><th>Ngày khai giảng</th><th>Khoá học</th><th>Địa điểm</th><th>GV phụ trách</th><th>HV đăng ký</th><th>Trạng thái</th></tr></thead>
+              <tbody>
+                ${[
+                  ['05/05/2025','K16 – Môi giới cơ bản','TP.HCM – CS1 Quận 1','Th.S Trần Hùng','45/50','Đã khai giảng'],
+                  ['12/05/2025','K9 – Luật kinh doanh BĐS','Hà Nội – CS Hoàn Kiếm','PGS.TS Lê Minh','32/40','Sắp khai giảng'],
+                  ['19/05/2025','K4 – Định giá BĐS','Đà Nẵng – Trung tâm Hải Châu','TS Nguyễn Phú','0/35','Đang tuyển sinh'],
+                  ['26/05/2025','K10 – CC hành nghề MG','Hà Nội – CS Cầu Giấy','Th.S Lê Thu','18/40','Đang tuyển sinh'],
+                  ['02/06/2025','K6 – Đầu tư BĐS','Bình Dương – VP Thủ Dầu Một','TS Phạm Quốc','0/40','Kế hoạch'],
+                  ['09/06/2025','K17 – Môi giới nâng cao','TP.HCM – CS1 Quận 1','Th.S Trần Hùng','0/50','Kế hoạch'],
+                ].map(([date,course,addr,teacher,reg,status])=>`
+                <tr>
+                  <td style="font-weight:500;color:var(--blue-800)">${date}</td>
+                  <td>${course}</td>
+                  <td style="font-size:12px;color:var(--color-text-secondary)">${addr}</td>
+                  <td>${teacher}</td>
+                  <td>${reg}</td>
+                  <td><span class="badge badge-${status==='Đã khai giảng'?'green':status==='Sắp khai giảng'?'blue':status==='Đang tuyển sinh'?'amber':'teal'}">${status}</span></td>
+                </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- EXAM -->
+      <div class="page" id="p-exam">
+        <div class="pg-title">Thi & Đánh giá</div>
+        <div class="pg-sub">Quản lý lịch thi và kết quả học viên</div>
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-label">Kỳ thi sắp tới</div><div class="stat-val">8</div></div>
+          <div class="stat-card"><div class="stat-label">HV dự thi T5</div><div class="stat-val">127</div></div>
+          <div class="stat-card"><div class="stat-label">Tỉ lệ đạt T4</div><div class="stat-val">91%</div><div class="stat-sub up">+3% so T3</div></div>
+          <div class="stat-card"><div class="stat-label">Điểm TB T4</div><div class="stat-val">7.8</div></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Lịch thi sắp tới</div><button class="btn primary">+ Tạo kỳ thi</button></div>
+          <div class="card-body">
+            <table>
+              <thead><tr><th>Ngày thi</th><th>Khoá học</th><th>Loại thi</th><th>Phòng thi</th><th>Số HV</th><th>Giám thị</th><th>Trạng thái</th></tr></thead>
+              <tbody>
+                ${[
+                  ['08/05/2025','K15-HCM','Kết thúc khoá','P.201 - CS1','42','Th.S Minh + Th.S Hoa','Đã lên lịch'],
+                  ['10/05/2025','K8-HN','Kết thúc khoá','P.101 - HN','38','PGS.TS Lê + TS Nam','Đã lên lịch'],
+                  ['15/05/2025','K3-DN','Giữa khoá','P.102 - ĐN','29','Th.S Tuấn','Đã lên lịch'],
+                  ['20/05/2025','K2-CT','Kết thúc khoá','P.201 - CT','25','Th.S Lan','Chờ xác nhận'],
+                  ['25/05/2025','K5-BD','Giữa khoá','P.101 - BD','33','Th.S Hải','Chờ xác nhận'],
+                ].map(([date,course,type,room,n,examiner,status])=>`
+                <tr>
+                  <td style="font-weight:500;color:var(--blue-800)">${date}</td>
+                  <td>${course}</td>
+                  <td><span class="badge badge-${type==='Kết thúc khoá'?'blue':'amber'}">${type}</span></td>
+                  <td style="font-size:12px">${room}</td>
+                  <td style="text-align:center">${n}</td>
+                  <td style="font-size:12px">${examiner}</td>
+                  <td><span class="badge badge-${status==='Đã lên lịch'?'green':'coral'}">${status}</span></td>
+                </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- CERT -->
+      <div class="page" id="p-cert">
+        <div class="pg-title">Cấp chứng chỉ hành nghề</div>
+        <div class="pg-sub">Quản lý chứng chỉ môi giới BĐS theo quy định Bộ Xây dựng</div>
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-label">Chờ cấp CC</div><div class="stat-val" style="color:var(--amber-600)">23</div></div>
+          <div class="stat-card"><div class="stat-label">Đã cấp tháng này</div><div class="stat-val">38</div></div>
+          <div class="stat-card"><div class="stat-label">Tổng đã cấp</div><div class="stat-val">2,841</div></div>
+          <div class="stat-card"><div class="stat-label">Sắp hết hạn (90 ngày)</div><div class="stat-val" style="color:var(--red-400)">47</div></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Hàng đợi cấp chứng chỉ</div><div class="card-actions"><button class="btn primary">Cấp hàng loạt</button></div></div>
+          <div class="card-body">
+            <table>
+              <thead><tr><th>Học viên</th><th>Mã HV</th><th>Khoá thi đỗ</th><th>Điểm thi</th><th>Tỉnh cấp</th><th>Số CC</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+              <tbody>
+                ${[
+                  ['Nguyễn Thị Lan','HV-2025-0301','K14-HCM','8.5','TP.HCM','CC-2025-HCM-0841','Chờ ký duyệt'],
+                  ['Trần Văn Minh','HV-2025-0302','K7-HN','7.8','Hà Nội','CC-2025-HN-0312','Chờ ký duyệt'],
+                  ['Lê Hoàng Nam','HV-2025-0303','K14-HCM','9.2','TP.HCM','CC-2025-HCM-0842','Đã ký duyệt'],
+                  ['Phạm Thị Hoa','HV-2025-0304','K7-HN','8.0','Hà Nội','CC-2025-HN-0313','Đang in'],
+                  ['Đặng Quốc Tuấn','HV-2025-0305','K3-BD','8.8','Bình Dương','CC-2025-BD-0089','Đã cấp'],
+                ].map(([name,id,course,score,city,ccno,status])=>`
+                <tr>
+                  <td style="font-weight:500">${name}</td>
+                  <td style="font-family:var(--font-mono);font-size:11px;color:var(--color-text-secondary)">${id}</td>
+                  <td>${course}</td>
+                  <td style="font-weight:500;color:var(--blue-800)">${score}</td>
+                  <td>${city}</td>
+                  <td style="font-family:var(--font-mono);font-size:11px">${ccno}</td>
+                  <td><span class="badge badge-${status==='Đã cấp'?'green':status==='Chờ ký duyệt'?'amber':status==='Đang in'?'blue':'teal'}">${status}</span></td>
+                  <td><button class="btn" style="font-size:11px;padding:3px 8px">Xem</button></td>
+                </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- CERT LOOKUP -->
+      <div class="page" id="p-cert_lookup">
+        <div class="pg-title">Tra cứu chứng chỉ</div>
+        <div class="pg-sub">Xác minh tính hợp lệ của chứng chỉ hành nghề môi giới BĐS</div>
+        <div class="card" style="max-width:560px">
+          <div class="card-hd"><div class="card-title">Tìm kiếm chứng chỉ</div></div>
+          <div class="card-body" style="padding:16px">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Số chứng chỉ</label>
+                <input class="form-input" placeholder="VD: CC-2025-HCM-0841" id="cc-input">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Họ tên người được cấp</label>
+                <input class="form-input" placeholder="Nguyễn Thị Lan">
+              </div>
+            </div>
+            <button class="btn primary" onclick="lookupCert()">Tra cứu</button>
+          </div>
+        </div>
+        <div class="card" id="cert-result" style="max-width:560px;display:none;border:2px solid var(--color-border-info)">
+          <div class="card-hd" style="background:var(--color-background-info)"><div class="card-title" style="color:var(--color-text-info)">Kết quả tra cứu — Hợp lệ</div></div>
+          <div class="card-body" style="padding:16px">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px">
+              ${[['Số CC','CC-2025-HCM-0841'],['Họ tên','Nguyễn Thị Lan'],['Ngày sinh','15/03/1990'],['Khoá học','K14 – Môi giới BĐS cơ bản'],['Điểm thi','8.5/10'],['Ngày cấp','02/05/2025'],['Cơ quan cấp','Viện NC&ĐT BĐS'],['Tỉnh cấp','TP.HCM'],['Hiệu lực','02/05/2028'],['Tình trạng','Còn hiệu lực']].map(([k,v])=>`
+              <div><div style="font-size:11px;color:var(--color-text-secondary)">${k}</div><div style="font-weight:500;margin-top:2px">${v}</div></div>`).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STAFF -->
+      <div class="page" id="p-staff">
+        <div class="pg-title">Cán bộ & Giảng viên</div>
+        <div class="pg-sub">Quản lý nhân sự cơ hữu và thỉnh giảng</div>
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-label">Tổng nhân sự</div><div class="stat-val">52</div></div>
+          <div class="stat-card"><div class="stat-label">Giảng viên cơ hữu</div><div class="stat-val">18</div></div>
+          <div class="stat-card"><div class="stat-label">Giảng viên thỉnh giảng</div><div class="stat-val">16</div></div>
+          <div class="stat-card"><div class="stat-label">Cán bộ hành chính</div><div class="stat-val">18</div></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Danh sách nhân sự</div><button class="btn primary" onclick="showModal('modal-staff')">+ Thêm nhân sự</button></div>
+          <div class="card-body">
+            <table>
+              <thead><tr><th>Nhân sự</th><th>Chức danh</th><th>Phòng ban</th><th>Chuyên môn</th><th>Học hàm/vị</th><th>Trạng thái</th></tr></thead>
+              <tbody>
+                ${[
+                  ['Nguyễn Văn Khoa','Viện trưởng','Ban Giám đốc','Quản trị BĐS','GS.TS','Chính thức','NK','blue'],
+                  ['Lê Thị Minh','P.Viện trưởng','Ban Giám đốc','Đào tạo','PGS.TS','Chính thức','LM','teal'],
+                  ['Trần Hùng','Trưởng phòng ĐT','P. Đào tạo','Môi giới BĐS','Th.S','Chính thức','TH','purple'],
+                  ['Phạm Quốc Đạt','Giảng viên','P. Đào tạo','Đầu tư BĐS','TS','Cơ hữu','PD','amber'],
+                  ['Nguyễn Phú Cường','Giảng viên','P. Đào tạo','Định giá BĐS','TS','Cơ hữu','NC','coral'],
+                  ['Lê Thu Hương','Chuyên viên','P. Hành chính','HC-Nhân sự','Th.S','Chính thức','LH','green'],
+                  ['Võ Văn Nam','Kế toán trưởng','P. Tài chính','Kế toán','Th.S','Chính thức','VN','blue'],
+                  ['Đặng Thị Lan','Chuyên viên','P. Khảo thí','Quản lý thi','ĐH','Chính thức','DL','teal'],
+                ].map(([name,title,dept,spec,degree,status,av,c])=>`
+                <tr>
+                  <td><div style="display:flex;align-items:center;gap:8px"><div class="avatar av-${c}">${av}</div>${name}</div></td>
+                  <td>${title}</td>
+                  <td>${dept}</td>
+                  <td>${spec}</td>
+                  <td><span class="badge badge-${c}">${degree}</span></td>
+                  <td><span class="badge badge-green">${status}</span></td>
+                </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- FINANCE -->
+      <div class="page" id="p-finance">
+        <div class="pg-title">Quản lý Thu – Chi</div>
+        <div class="pg-sub">Tài chính tháng 5/2025</div>
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-label">Tổng thu T5</div><div class="stat-val" style="color:var(--teal-600)">1,24 tỷ</div><div class="stat-sub up">+14%</div></div>
+          <div class="stat-card"><div class="stat-label">Tổng chi T5</div><div class="stat-val" style="color:var(--coral-600)">680 triệu</div></div>
+          <div class="stat-card"><div class="stat-label">Lợi nhuận T5</div><div class="stat-val">560 triệu</div><div class="stat-sub up">Biên LN 45%</div></div>
+          <div class="stat-card"><div class="stat-label">Học phí chưa thu</div><div class="stat-val" style="color:var(--amber-600)">84 triệu</div></div>
+        </div>
+        <div class="grid2">
+          <div class="card">
+            <div class="card-hd"><div class="card-title">Cơ cấu thu</div></div>
+            <div class="card-body" style="padding:14px">
+              ${[['Học phí khoá học','870','teal',70],['Phí cấp chứng chỉ','230','blue',19],['Phí ôn thi','92','purple',7],['Khác','48','amber',4]].map(([name,val,c,pct])=>`
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+                <div style="width:90px;font-size:12px;color:var(--color-text-secondary)">${name}</div>
+                <div style="flex:1"><div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:var(--${c}-600)"></div></div></div>
+                <div style="font-size:13px;font-weight:500;min-width:70px;text-align:right">${val} tr.</div>
+              </div>`).join('')}
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-hd"><div class="card-title">Cơ cấu chi</div></div>
+            <div class="card-body" style="padding:14px">
+              ${[['Lương GV & CB','310','coral',46],['Cơ sở vật chất','120','amber',18],['In ấn CC & tài liệu','85','purple',12],['Marketing','95','blue',14],['Vận hành khác','70','teal',10]].map(([name,val,c,pct])=>`
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+                <div style="width:90px;font-size:12px;color:var(--color-text-secondary)">${name}</div>
+                <div style="flex:1"><div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:var(--${c}-600)"></div></div></div>
+                <div style="font-size:13px;font-weight:500;min-width:60px;text-align:right">${val} tr.</div>
+              </div>`).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BRANCHES -->
+      <div class="page" id="p-branches">
+        <div class="pg-title">Chi nhánh & Tỉnh thành</div>
+        <div class="pg-sub">Mạng lưới hoạt động toàn quốc</div>
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-label">Tổng chi nhánh</div><div class="stat-val">9</div></div>
+          <div class="stat-card"><div class="stat-label">Tỉnh thành</div><div class="stat-val">7</div></div>
+          <div class="stat-card"><div class="stat-label">Đang mở rộng</div><div class="stat-val">2</div></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Danh sách chi nhánh</div><button class="btn primary">+ Thêm chi nhánh</button></div>
+          <div class="card-body">
+            <table>
+              <thead><tr><th>Chi nhánh</th><th>Địa chỉ</th><th>Phụ trách</th><th>HV đang học</th><th>Khoá đang mở</th><th>Trạng thái</th></tr></thead>
+              <tbody>
+                ${[
+                  ['CS1 – TP.HCM','18 Lê Thánh Tôn, Q.1, TP.HCM','Phạm Văn Đức','87','3','Đang hoạt động'],
+                  ['CS2 – TP.HCM','45 Đinh Tiên Hoàng, Q.BT, TP.HCM','Nguyễn Thị Thu','62','2','Đang hoạt động'],
+                  ['CS1 – Hà Nội','12 Tràng Thi, Hoàn Kiếm, HN','Lê Văn Long','89','2','Đang hoạt động'],
+                  ['CS2 – Hà Nội','78 Nguyễn Chí Thanh, Đống Đa, HN','Trần Thị Mai','34','1','Đang hoạt động'],
+                  ['Đà Nẵng','22 Phan Chu Trinh, Hải Châu, ĐN','Võ Quang Hải','29','1','Đang hoạt động'],
+                  ['Bình Dương','9 Lê Hồng Phong, TDM, BD','Đặng Văn Kỳ','33','1','Đang hoạt động'],
+                  ['Cần Thơ','5 Lý Tự Trọng, Ninh Kiều, CT','Nguyễn Văn Bình','18','1','Đang hoạt động'],
+                  ['Hải Phòng','34 Điện Biên Phủ, Lê Chân, HP','Bùi Thị Hà','14','1','Đang thử nghiệm'],
+                  ['Đồng Nai','67 Phạm Văn Thuận, Biên Hoà','Lê Minh Tú','9','0','Sắp mở'],
+                ].map(([name,addr,head,hv,courses,status])=>`
+                <tr>
+                  <td style="font-weight:500">${name}</td>
+                  <td style="font-size:12px;color:var(--color-text-secondary)">${addr}</td>
+                  <td>${head}</td>
+                  <td style="text-align:center"><strong>${hv}</strong></td>
+                  <td style="text-align:center">${courses}</td>
+                  <td><span class="badge badge-${status==='Đang hoạt động'?'green':status==='Đang thử nghiệm'?'amber':'blue'}">${status}</span></td>
+                </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- RESEARCH -->
+      <div class="page" id="p-research">
+        <div class="pg-title">Đề tài nghiên cứu</div>
+        <div class="pg-sub">Các dự án nghiên cứu khoa học và thị trường BĐS</div>
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Danh sách đề tài</div><button class="btn primary">+ Đăng ký đề tài</button></div>
+          <div class="card-body">
+            <table>
+              <thead><tr><th>Đề tài</th><th>Chủ nhiệm</th><th>Cấp</th><th>Ngân sách</th><th>Thời gian</th><th>Tiến độ</th><th>Trạng thái</th></tr></thead>
+              <tbody>
+                ${[
+                  ['Thị trường BĐS nhà ở TP.HCM sau dịch 2023-2025','GS.TS Nguyễn Văn Khoa','Viện','180 tr.','2024-2025','75%','Đang triển khai'],
+                  ['Xây dựng khung năng lực môi giới BĐS Việt Nam','PGS.TS Lê Thị Minh','Bộ XD','450 tr.','2023-2025','90%','Hoàn thiện báo cáo'],
+                  ['Phân tích rủi ro đầu tư BĐS nghỉ dưỡng','TS Phạm Quốc Đạt','Viện','120 tr.','2025','30%','Mới bắt đầu'],
+                  ['Chỉ số giá BĐS các tỉnh phía Nam 2025','TS Nguyễn Phú Cường','Viện','95 tr.','2025','50%','Đang triển khai'],
+                ].map(([title,head,level,budget,time,pct,status])=>`
+                <tr>
+                  <td style="font-weight:500;max-width:200px">${title}</td>
+                  <td style="font-size:12px">${head}</td>
+                  <td><span class="badge badge-${level==='Bộ XD'?'blue':'purple'}">${level}</span></td>
+                  <td>${budget}</td>
+                  <td style="font-size:12px">${time}</td>
+                  <td><div style="display:flex;align-items:center;gap:6px"><div class="progress-bar" style="width:60px"><div class="progress-fill" style="width:${pct};background:var(--teal-600)"></div></div><span style="font-size:11px">${pct}</span></div></td>
+                  <td><span class="badge badge-${status==='Hoàn thiện báo cáo'?'green':status==='Mới bắt đầu'?'amber':'blue'}">${status}</span></td>
+                </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- PARTNERS -->
+      <div class="page" id="p-partners">
+        <div class="pg-title">Đối tác liên kết</div>
+        <div class="pg-sub">Doanh nghiệp BĐS, hiệp hội và tổ chức liên kết đào tạo</div>
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Danh sách đối tác</div><button class="btn primary">+ Thêm đối tác</button></div>
+          <div class="card-body">
+            <table>
+              <thead><tr><th>Tên đối tác</th><th>Loại hình</th><th>Tỉnh thành</th><th>Liên hệ</th><th>HV giới thiệu</th><th>Hợp đồng HH</th></tr></thead>
+              <tbody>
+                ${[
+                  ['Tập đoàn Vinhomes','Chủ đầu tư lớn','Toàn quốc','Nguyễn Minh – 0909xxxxxx','124','8%'],
+                  ['HOREII – Hội môi giới VN','Hiệp hội','Toàn quốc','Lê Hùng – 0901xxxxxx','89','Đối tác chiến lược'],
+                  ['Sàn GD BĐS Thành Đô','Sàn giao dịch','Cần Thơ','Trần Bình – 0903xxxxxx','32','10%'],
+                  ['Đại học Kinh tế TPHCM','Trường ĐH','TP.HCM','PGS Lan – 028xxxxxxx','45','Liên kết đào tạo'],
+                  ['Sở Xây dựng TP.HCM','Cơ quan nhà nước','TP.HCM','Vụ QLBĐS','0','Chỉ định đào tạo'],
+                  ['Batdongsan.com.vn','Nền tảng trực tuyến','Toàn quốc','Marketing – 024xxxxxxx','67','Quảng cáo'],
+                ].map(([name,type,city,contact,hv,deal])=>`
+                <tr>
+                  <td style="font-weight:500">${name}</td>
+                  <td><span class="badge badge-blue">${type}</span></td>
+                  <td>${city}</td>
+                  <td style="font-size:12px;color:var(--color-text-secondary)">${contact}</td>
+                  <td style="text-align:center">${hv}</td>
+                  <td style="font-size:12px">${deal}</td>
+                </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- REPORTS -->
+      <div class="page" id="p-reports">
+        <div class="pg-title">Báo cáo tổng hợp</div>
+        <div class="pg-sub">Xuất báo cáo quản lý theo kỳ</div>
+        <div class="grid2">
+          ${[
+            ['Báo cáo học viên','Tổng hợp đăng ký, tiến độ, hoàn thành theo khoá và tỉnh thành','blue'],
+            ['Báo cáo tài chính','Doanh thu – Chi phí – Học phí tồn đọng theo tháng/quý','teal'],
+            ['Báo cáo chứng chỉ','Số lượng CC đã cấp, sắp hết hạn, theo tỉnh thành','amber'],
+            ['Báo cáo giảng viên','Giờ giảng, đánh giá, thu nhập GV theo khoá','purple'],
+            ['Báo cáo khoá học','Tỉ lệ lấp đầy, tỉ lệ đỗ tốt nghiệp, đánh giá khoá','coral'],
+            ['Báo cáo chi nhánh','Doanh thu, học viên, khoá học theo chi nhánh/tỉnh','green'],
+          ].map(([title,desc,c])=>`
+          <div class="card">
+            <div class="card-body" style="padding:16px">
+              <div style="font-size:24px;margin-bottom:8px;color:var(--${c}-600)">⬛</div>
+              <div style="font-weight:500;margin-bottom:4px">${title}</div>
+              <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:12px">${desc}</div>
+              <div style="display:flex;gap:6px">
+                <button class="btn" style="font-size:11px">Xem PDF</button>
+                <button class="btn" style="font-size:11px">Xuất Excel</button>
+              </div>
+            </div>
+          </div>`).join('')}
+        </div>
+      </div>
+
+      <!-- HR PAGE -->
+      <div class="page" id="p-hr">
+        <div class="pg-title">Quản lý nhân sự (HR)</div>
+        <div class="pg-sub">Hợp đồng, nghỉ phép, đánh giá hiệu suất</div>
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-label">Tổng biên chế</div><div class="stat-val">52</div></div>
+          <div class="stat-card"><div class="stat-label">HĐ sắp hết hạn</div><div class="stat-val" style="color:var(--amber-600)">4</div></div>
+          <div class="stat-card"><div class="stat-label">Đơn nghỉ phép chờ duyệt</div><div class="stat-val">7</div></div>
+          <div class="stat-card"><div class="stat-label">Tuyển dụng đang mở</div><div class="stat-val">3</div></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Hợp đồng lao động</div><button class="btn primary">+ Thêm hợp đồng</button></div>
+          <div class="card-body">
+            <table>
+              <thead><tr><th>Nhân sự</th><th>Loại HĐ</th><th>Ngày bắt đầu</th><th>Ngày kết thúc</th><th>Phòng ban</th><th>Lương cơ bản</th><th>Trạng thái</th></tr></thead>
+              <tbody>
+                ${[
+                  ['Nguyễn Văn Khoa','HĐ không thời hạn','01/01/2018','—','BGĐ','45,000,000đ','Có hiệu lực'],
+                  ['Trần Hùng','HĐ 2 năm','01/06/2024','31/05/2026','P.Đào tạo','22,000,000đ','Có hiệu lực'],
+                  ['Lê Thu Hương','HĐ 1 năm','01/03/2025','28/02/2026','P.HC','15,000,000đ','Có hiệu lực'],
+                  ['Đặng Thị Lan','HĐ 1 năm','01/06/2024','31/05/2025','P.Khảo thí','16,500,000đ','Sắp hết hạn'],
+                ].map(([name,type,start,end,dept,salary,status])=>`
+                <tr>
+                  <td style="font-weight:500">${name}</td>
+                  <td><span class="badge badge-blue">${type}</span></td>
+                  <td>${start}</td>
+                  <td style="color:${end==='—'?'var(--color-text-tertiary)':'var(--color-text-primary)'}">${end}</td>
+                  <td>${dept}</td>
+                  <td style="font-variant-numeric:tabular-nums">${salary}</td>
+                  <td><span class="badge badge-${status==='Có hiệu lực'?'green':'amber'}">${status}</span></td>
+                </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TUITION -->
+      <div class="page" id="p-tuition">
+        <div class="pg-title">Quản lý học phí</div>
+        <div class="pg-sub">Thu học phí và theo dõi công nợ học viên</div>
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-label">Đã thu T5</div><div class="stat-val" style="color:var(--teal-600)">1.16 tỷ</div></div>
+          <div class="stat-card"><div class="stat-label">Còn nợ</div><div class="stat-val" style="color:var(--red-400)">84 triệu</div></div>
+          <div class="stat-card"><div class="stat-label">HV nợ học phí</div><div class="stat-val">12</div></div>
+          <div class="stat-card"><div class="stat-label">Đã hoàn học phí</div><div class="stat-val">18 triệu</div></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Công nợ học phí</div></div>
+          <div class="card-body">
+            <table>
+              <thead><tr><th>Học viên</th><th>Khoá học</th><th>Học phí</th><th>Đã đóng</th><th>Còn nợ</th><th>Hạn đóng</th><th>Trạng thái</th></tr></thead>
+              <tbody>
+                ${[
+                  ['Trần Văn A','K15-HCM','8,500,000','5,000,000','3,500,000','15/05/2025','Quá hạn'],
+                  ['Nguyễn Thị B','K8-HN','9,200,000','4,600,000','4,600,000','20/05/2025','Sắp đến hạn'],
+                  ['Lê Hoàng C','K3-DN','7,800,000','0','7,800,000','25/05/2025','Chưa đóng'],
+                  ['Phạm Thị D','K2-CT','8,000,000','6,000,000','2,000,000','30/05/2025','Bình thường'],
+                ].map(([name,course,total,paid,debt,due,status])=>`
+                <tr>
+                  <td style="font-weight:500">${name}</td>
+                  <td>${course}</td>
+                  <td>${total}</td>
+                  <td style="color:var(--teal-600)">${paid}</td>
+                  <td style="color:var(--red-400);font-weight:500">${debt}</td>
+                  <td>${due}</td>
+                  <td><span class="badge badge-${status==='Quá hạn'?'red':status==='Sắp đến hạn'?'amber':status==='Chưa đóng'?'coral':'green'}">${status}</span></td>
+                </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- DOCS PAGE -->
+      <div class="page" id="p-docs">
+        <div class="pg-title">Văn bản & Hồ sơ</div>
+        <div class="pg-sub">Lưu trữ và quản lý tài liệu hành chính</div>
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Danh mục văn bản</div><button class="btn primary">+ Tải lên văn bản</button></div>
+          <div class="card-body">
+            <table>
+              <thead><tr><th>Số ký hiệu</th><th>Tên văn bản</th><th>Loại</th><th>Ngày ban hành</th><th>Người ban hành</th><th>Thao tác</th></tr></thead>
+              <tbody>
+                ${[
+                  ['QĐ-01/2025/VT','Quyết định ban hành quy chế đào tạo 2025','Quyết định','02/01/2025','Viện trưởng','blue'],
+                  ['TT-07/2015/BXD','Thông tư 07 về sát hạch môi giới BĐS','Thông tư','25/11/2015','Bộ Xây dựng','teal'],
+                  ['HD-03/2025/P.DT','Hướng dẫn tổ chức thi kết thúc khoá','Hướng dẫn','15/03/2025','P. Đào tạo','purple'],
+                  ['BB-12/2025/KT','Biên bản kỳ thi K14-HCM','Biên bản','28/04/2025','P. Khảo thí','amber'],
+                  ['HĐ-005/2025/LK','HĐ liên kết đào tạo với UHCM','Hợp đồng','01/02/2025','BGĐ','coral'],
+                ].map(([code,name,type,date,issuer,c])=>`
+                <tr>
+                  <td style="font-family:var(--font-mono);font-size:11px">${code}</td>
+                  <td style="font-weight:500">${name}</td>
+                  <td><span class="badge badge-${c}">${type}</span></td>
+                  <td>${date}</td>
+                  <td>${issuer}</td>
+                  <td><button class="btn" style="font-size:11px;padding:3px 8px">Xem</button></td>
+                </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ASSETS PAGE -->
+      <div class="page" id="p-assets">
+        <div class="pg-title">Cơ sở vật chất</div>
+        <div class="pg-sub">Quản lý phòng học, thiết bị và cơ sở hạ tầng</div>
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Danh sách phòng học & cơ sở</div></div>
+          <div class="card-body">
+            <table>
+              <thead><tr><th>Phòng/Cơ sở</th><th>Địa điểm</th><th>Sức chứa</th><th>Trang bị</th><th>Tình trạng</th><th>Đặt phòng T5</th></tr></thead>
+              <tbody>
+                ${[
+                  ['P.201 – CS1 HCM','Q.1 TP.HCM','50 người','Máy chiếu, AC, wifi','Tốt','18/20 ngày'],
+                  ['P.202 – CS1 HCM','Q.1 TP.HCM','40 người','Máy chiếu, AC, wifi','Tốt','12/20 ngày'],
+                  ['P.101 – CS HN','Hoàn Kiếm HN','45 người','Máy chiếu, AC, wifi','Tốt','15/20 ngày'],
+                  ['P.102 – CS HN','Hoàn Kiếm HN','35 người','Máy chiếu, AC','Cần bảo trì','5/20 ngày'],
+                  ['Phòng thi – CS1 HCM','Q.1 TP.HCM','60 người','Camera, máy tính','Tốt','8/10 ngày'],
+                ].map(([name,addr,cap,equip,cond,book])=>`
+                <tr>
+                  <td style="font-weight:500">${name}</td>
+                  <td style="font-size:12px;color:var(--color-text-secondary)">${addr}</td>
+                  <td>${cap}</td>
+                  <td style="font-size:12px">${equip}</td>
+                  <td><span class="badge badge-${cond==='Tốt'?'green':'amber'}">${cond}</span></td>
+                  <td>${book}</td>
+                </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- PUBLICATIONS -->
+      <div class="page" id="p-publications">
+        <div class="pg-title">Ấn phẩm & Báo cáo</div>
+        <div class="pg-sub">Các nghiên cứu, báo cáo thị trường và tài liệu đào tạo đã xuất bản</div>
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Danh sách ấn phẩm</div><button class="btn primary">+ Thêm ấn phẩm</button></div>
+          <div class="card-body">
+            <table>
+              <thead><tr><th>Tên ấn phẩm</th><th>Tác giả</th><th>Loại</th><th>Năm</th><th>Lượt tải</th><th>Trạng thái</th></tr></thead>
+              <tbody>
+                ${[
+                  ['Báo cáo thị trường BĐS Q1/2025','Nhóm NC Viện','Báo cáo thị trường','2025','1,240','Đã phát hành'],
+                  ['Tài liệu đào tạo môi giới BĐS 2025','P. Đào tạo','Tài liệu đào tạo','2025','847','Đã phát hành'],
+                  ['Phân tích pháp lý BĐS 2024','PGS.TS Lê Thị Minh','Nghiên cứu khoa học','2024','322','Đã phát hành'],
+                  ['Cẩm nang định giá BĐS','TS Nguyễn Phú Cường','Sách chuyên khảo','2024','589','Đã phát hành'],
+                  ['Báo cáo thị trường BĐS Q2/2025','Nhóm NC Viện','Báo cáo thị trường','2025','0','Đang biên soạn'],
+                ].map(([title,author,type,year,dl,status])=>`
+                <tr>
+                  <td style="font-weight:500">${title}</td>
+                  <td style="font-size:12px">${author}</td>
+                  <td><span class="badge badge-blue">${type}</span></td>
+                  <td>${year}</td>
+                  <td>${dl}</td>
+                  <td><span class="badge badge-${status==='Đã phát hành'?'green':'amber'}">${status}</span></td>
+                </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="overlay" id="modal-course" onclick="if(event.target===this)closeModal('modal-course')">
+  <div class="modal">
+    <div class="modal-title">Thêm khoá học mới</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Tên khoá học</label><input class="form-input" placeholder="Môi giới BĐS cơ bản"></div>
+      <div class="form-group"><label class="form-label">Mã khoá</label><input class="form-input" placeholder="K16-HCM"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Chi nhánh</label>
+        <select class="form-input"><option>TP.HCM – CS1</option><option>Hà Nội – CS1</option><option>Đà Nẵng</option><option>Bình Dương</option><option>Cần Thơ</option></select>
+      </div>
+      <div class="form-group"><label class="form-label">Thời lượng (tiết)</label><input class="form-input" type="number" placeholder="60"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Ngày khai giảng</label><input class="form-input" type="date"></div>
+      <div class="form-group"><label class="form-label">Số HV tối đa</label><input class="form-input" type="number" placeholder="50"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Học phí</label><input class="form-input" placeholder="8,500,000"></div>
+      <div class="form-group"><label class="form-label">Giảng viên phụ trách</label>
+        <select class="form-input"><option>Th.S Trần Hùng</option><option>TS Phạm Quốc Đạt</option><option>PGS.TS Lê Thị Minh</option></select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('modal-course')">Huỷ</button>
+      <button class="btn primary" onclick="closeModal('modal-course')">Lưu khoá học</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="modal-student" onclick="if(event.target===this)closeModal('modal-student')">
+  <div class="modal">
+    <div class="modal-title">Thêm học viên mới</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Họ và tên</label><input class="form-input" placeholder="Nguyễn Thị Lan"></div>
+      <div class="form-group"><label class="form-label">Ngày sinh</label><input class="form-input" type="date"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">CCCD/CMND</label><input class="form-input" placeholder="0123456789"></div>
+      <div class="form-group"><label class="form-label">Số điện thoại</label><input class="form-input" placeholder="0909xxxxxx"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Email</label><input class="form-input" placeholder="email@example.com"></div>
+      <div class="form-group"><label class="form-label">Tỉnh thành thường trú</label>
+        <select class="form-input"><option>TP.HCM</option><option>Hà Nội</option><option>Đà Nẵng</option><option>Bình Dương</option><option>Cần Thơ</option></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Đăng ký khoá học</label>
+        <select class="form-input"><option>K16-HCM – Môi giới BĐS</option><option>K9-HN – Luật KD BĐS</option><option>K10-HN – CC Hành nghề</option></select>
+      </div>
+      <div class="form-group"><label class="form-label">Hình thức thanh toán</label>
+        <select class="form-input"><option>Thanh toán 1 lần</option><option>Trả góp 2 đợt</option><option>Chưa thanh toán</option></select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('modal-student')">Huỷ</button>
+      <button class="btn primary" onclick="closeModal('modal-student')">Đăng ký học viên</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="modal-staff" onclick="if(event.target===this)closeModal('modal-staff')">
+  <div class="modal">
+    <div class="modal-title">Thêm cán bộ / Giảng viên</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Họ và tên</label><input class="form-input" placeholder="Nguyễn Văn A"></div>
+      <div class="form-group"><label class="form-label">Chức danh</label><input class="form-input" placeholder="Giảng viên"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Phòng ban</label>
+        <select class="form-input"><option>P. Đào tạo</option><option>P. Khảo thí & CC</option><option>P. Nghiên cứu</option><option>P. Tài chính</option><option>P. Hành chính</option><option>BGĐ</option></select>
+      </div>
+      <div class="form-group"><label class="form-label">Học hàm/học vị</label>
+        <select class="form-input"><option>GS.TS</option><option>PGS.TS</option><option>TS</option><option>Th.S</option><option>ĐH</option></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Chuyên môn</label><input class="form-input" placeholder="Môi giới BĐS"></div>
+      <div class="form-group"><label class="form-label">Loại hợp đồng</label>
+        <select class="form-input"><option>Cơ hữu</option><option>Thỉnh giảng</option><option>Hành chính</option></select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('modal-staff')">Huỷ</button>
+      <button class="btn primary" onclick="closeModal('modal-staff')">Thêm nhân sự</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const pg = document.getElementById('p-' + id);
+  if (pg) pg.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.getAttribute('onclick') && n.getAttribute('onclick').includes("'" + id + "'")) {
+      n.classList.add('active');
+    }
+  });
+}
+
+function showModal(id) {
+  const m = document.getElementById(id);
+  if (m) m.classList.add('show');
+}
+
+function closeModal(id) {
+  const m = document.getElementById(id);
+  if (m) m.classList.remove('show');
+}
+
+function lookupCert() {
+  const v = document.getElementById('cc-input').value.trim();
+  const r = document.getElementById('cert-result');
+  if (v.length > 3) {
+    r.style.display = 'block';
+  }
+}
+</script>
